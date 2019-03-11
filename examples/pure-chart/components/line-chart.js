@@ -5,7 +5,13 @@ import {initData, drawYAxis, drawGuideLine, drawYAxisLabels, numberWithCommas, d
 class LineChart extends React.Component {
   constructor (props) {
     super(props)
-    let newState = initData(this.props.data, this.props.height, this.props.gap, this.props.numberOfYAxisGuideLine)
+    let newState = initData(
+                              this.props.data,
+                              this.props.height,
+                              this.props.gap,
+                              this.props.numberOfYAxisGuideLine,
+                              this.props.maxValue)
+
     this.state = {
       loading: false,
       sortedData: newState.sortedData,
@@ -44,7 +50,7 @@ class LineChart extends React.Component {
       this.setState(Object.assign({
         fadeAnim: new Animated.Value(0)
       }, initData(nextProps.data, this.props.height, this.props.gap, this.props.numberOfYAxisGuideLine)), () => {
-        Animated.timing(this.state.fadeAnim, { toValue: 1, easing: Easing.bounce, duration: 1000, useNativeDriver: true }).start()
+        }, initData(nextProps.data, this.props.height, this.props.gap, this.props.numberOfYAxisGuideLine, this.props.maxValue)), () => {
       })
     }
   }
