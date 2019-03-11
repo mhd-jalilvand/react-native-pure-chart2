@@ -1,6 +1,6 @@
 {
-  "name": "mhd.jalilvand@react-native-pure-chart",
-  "version": "0.0.25",
+  "name": "react-native-pure-chart2-mj",
+  "version": "0.0.26",
   "description": "",
   "devDependencies": {
     "jest-expo": "~20.0.0",
@@ -25,7 +25,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/oksktank/react-native-pure-chart.git"
+    "url": "git+https://github.com/mhd-jalilvand/react-native-pure-chart2.git"
   },
   "keywords": [
     "react-native",
@@ -36,7 +36,7 @@
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/oksktank/react-native-pure-chart/issues"
+    "url": "https://github.com/mhd-jalilvand/react-native-pure-chart2/issues"
   },
-  "homepage": "https://github.com/oksktank/react-native-pure-chart#readme"
+  "homepage": "https://github.com/mhd-jalilvand/react-native-pure-chart2/#readme"
 }
