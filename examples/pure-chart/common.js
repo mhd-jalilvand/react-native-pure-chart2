@@ -6,16 +6,18 @@ const SINGLE_SERIES_WITH_NUMBERS = 0
 const SINGLE_SERIES_WITH_OBJECTS = 1
 const MULTI_SERIES = 2
 
-function flattenData (data) {
+function flattenData (data,min=0) {
   let numberCount = 0
   let objectWithYCount = 0
   let multiSeriesCount = 0
   let length = data.length
   data.map((obj) => {
     if (typeof obj === 'number') {
+      obj -=min
       numberCount++
     } else if (typeof obj === 'object') {
       if (typeof obj.y === 'number') {
+        obj.y -=min;
         objectWithYCount++
       } else if (Array.isArray(obj.data)) {
         multiSeriesCount++
@@ -59,30 +61,38 @@ function getMaxValue (data) {
     }
   })
 
-  if (values.length === 0) return 0
+  if (values.length === 0) return {max:0,min:0}
 
-  return Math.max.apply(null, values)
+  return {max:Math.max.apply(null, values),min:Math.min.apply(null, values)}
 }
 
- export const initData = (dataProp, height, gap, numberOfPoints = 5, maxValue,minValue=0) => {
-  let guideArray, max, sortedData
+export const initData = (dataProp, height, gap, numberOfPoints = 5,zoom=false) => {
+  let guideArray, sortedData
   if (!dataProp || !Array.isArray(dataProp) || dataProp.length === 0) {
     return {
       sortedData: [],
       max: 0,
+      min: 0,
       guideArray: []
     }
   }
+  //min = 20000
+  let{max,min} = getMaxValue(dataProp)
+  if(zoom){
+    min -= (min*.10)
+    max -=min;
+  }else min =0;
+  dataProp = flattenData(dataProp,min)
 
-  max = Math.max(maxValue, getMaxValue(dataProp))
-  guideArray = getGuideArray(max, height, numberOfPoints)
+  guideArray = getGuideArray(max, height, numberOfPoints,min)
 
-  dataProp = flattenData(dataProp)
+
 
   sortedData = refineData(dataProp, max, height, gap)
   return {
     sortedData: sortedData,
     max: max,
+    min: min,
     selectedIndex: null,
     nowHeight: 200,
     nowWidth: 200,
@@ -177,8 +187,9 @@ export const refineData = (flattenData, max, height, gap) => {
   return result
 }
 
-export const getGuideArray = (max, height, numberOfPoints = 5) => {
+export const getGuideArray = (max, height, numberOfPoints = 5,min) => {
   let x = parseInt(max)
+  let xmin = parseInt(min)
 
   let arr = []
   let length
@@ -195,6 +206,7 @@ export const getGuideArray = (max, height, numberOfPoints = 5) => {
   } else if (x >= 1000 && x < 1000000) {
     postfix = 'K'
     x = Math.round(x / 100)
+    xmin = Math.round(min / 100)
     temp = 1000
   } else if (x >= 1000000 && x < 1000000000) {
     postfix = 'M'
@@ -207,7 +219,12 @@ export const getGuideArray = (max, height, numberOfPoints = 5) => {
   }
   length = x.toString().length
 
+
+
+
   x = _.round(x, -1 * length + 1) / 10
+  xmin = _.round(xmin, -1 * length + 1) / 10
+
   let first = parseInt(x.toString()[0])
 
   if (first > -1 && first < 3) { // 1,2
@@ -218,9 +235,9 @@ export const getGuideArray = (max, height, numberOfPoints = 5) => {
     x = 10 * x / first
   }
 
-  for (let i = 1; i < numberOfPoints + 1; i++) {
+  for (let i = 0; i < numberOfPoints + 1; i++) {
     let v = x / numberOfPoints * i
-    arr.push([v + postfix, v * temp / max * height, 1 * temp / max * height])
+    arr.push([v+xmin + postfix, (v * temp / max * height), 1 * temp / max * height])
   }
 
   return arr
@@ -255,7 +272,7 @@ export const drawYAxisLabels = (arr, height, minValue, color = '#000000') => {
         <View
           key={'guide0'}
           style={{
-            bottom: 0,
+            bottom: 3,
             position: 'absolute'
           }}>
           <Text style={{fontSize: 11}}>0</Text>
@@ -266,7 +283,7 @@ export const drawYAxisLabels = (arr, height, minValue, color = '#000000') => {
           <View
             key={'guide' + i}
             style={{
-              bottom: v[1] - 5,
+              bottom: v[1] - 1,
               position: 'absolute'
             }}>
             <Text style={{fontSize: 11, color: color}}>{v[0]}</Text>

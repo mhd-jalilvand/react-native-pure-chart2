@@ -5,13 +5,7 @@ import {initData, drawYAxis, drawGuideLine, drawYAxisLabels, numberWithCommas, d
 class LineChart extends React.Component {
   constructor (props) {
     super(props)
-    let newState = initData(
-                              this.props.data,
-                              this.props.height,
-                              this.props.gap,
-                              this.props.numberOfYAxisGuideLine,
-                              this.props.maxValue)
-
+    let newState = initData(this.props.data, this.props.height, this.props.gap, this.props.numberOfYAxisGuideLine, this.props.zoom)
     this.state = {
       loading: false,
       sortedData: newState.sortedData,
@@ -22,6 +16,7 @@ class LineChart extends React.Component {
       nowX: 0,
       nowY: 0,
       max: newState.max,
+      min: newState.min,
       fadeAnim: new Animated.Value(0),
       guideArray: newState.guideArray
     }
@@ -49,7 +44,8 @@ class LineChart extends React.Component {
     if (nextProps.data !== this.props.data) {
       this.setState(Object.assign({
         fadeAnim: new Animated.Value(0)
-        }, initData(nextProps.data, this.props.height, this.props.gap, this.props.numberOfYAxisGuideLine, this.props.maxValue)), () => {
+      }, initData(nextProps.data, this.props.height, this.props.gap, this.props.numberOfYAxisGuideLine,this.props.zoom)), () => {
+        Animated.timing(this.state.fadeAnim, { toValue: 1, easing: Easing.bounce, duration: 1000, useNativeDriver: true }).start()
       })
     }
   }
@@ -282,7 +278,7 @@ class LineChart extends React.Component {
                       borderRadius: 2,
                       backgroundColor: !series.seriesColor ? this.props.primaryColor : series.seriesColor
                     }} />
-                    <Text style={styles.tooltipValue}>{numberWithCommas(dataObject.y, false)}</Text>
+                    <Text style={styles.tooltipValue}>{numberWithCommas(dataObject.y+this.state.min, false)}</Text>
                   </View>
                 </View>
               )
